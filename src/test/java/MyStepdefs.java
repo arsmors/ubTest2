@@ -1,4 +1,5 @@
 import java.util.Map;
+import java.util.Random;
 
 import com.example.demo2.Book;
 import com.example.demo2.BookController;
@@ -10,7 +11,7 @@ import io.cucumber.java.en.When;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.apache.http.HttpStatus;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.core.Is.is;
@@ -29,35 +30,44 @@ public class MyStepdefs {
     public void cleanUp() {
         given()
                 .when()
-                .delete("/books/all")
-                .then()
-                .statusCode(HttpStatus.SC_OK);
+                .delete("/books/deleteAll");
+
+        given()
+                .when()
+                .get("/books/list")
+                .then().body("size()", is(0));
     }
 
     @When("{int} books are added to the library")
     public void booksAreAddedToTheLibrary(int qty) {
         Book book = new Book();
-            for (int i = 0; i < qty; i++) {
-                Response response = given()
-                        .contentType(ContentType.JSON)
-                        .body(book)
-                        .when()
-                        .post("/books");
+        Random random = new Random();
+        for (int i = 0; i < qty; i++) {
+            book.setTitle("Name" + RandomStringUtils.randomNumeric(10));
+            book.setAuthor("Author" + RandomStringUtils.randomNumeric(10));
+            book.setBookYear("19" + RandomStringUtils.randomNumeric(2));
+            book.setAvailable(random.nextInt(99));
+            Response response = given()
+                    .contentType(ContentType.JSON)
+                    .body(book)
+                    .when()
+                    .post("/books/add");
 
-                response
-                        .then()
-                        .statusCode(200);
+            response
+                    .then()
+                    .statusCode(201);
 
-                bookId = response.then().extract().path("id");
-            }
+            bookId = response.then().extract().path("id");
+        }
     }
+
 
     @Then("the library should have total {int} books")
     public void theLibraryShouldHaveTotalBooks(int qty) {
         RestAssured
                 .given()
                 .when()
-                .get("/books")
+                .get("/books/list")
                 .then()
                 .statusCode(200)
                 .body("size()", is(qty));
@@ -76,8 +86,7 @@ public class MyStepdefs {
                 .body(book)
                 .when()
                 .put("/books/" + bookId);
-
-        }
+    }
 
     @When("I update book with following info")
     public void iUpdateBookWithFollowingInfo(Map<String, String> requestFields) {
@@ -99,17 +108,17 @@ public class MyStepdefs {
         Book book = new Book();
         book.setTitle(requestFields.get("Name"));
         book.setAuthor(requestFields.get("Author"));
-        book.setTitle(requestFields.get("Year"));
+        book.setBookYear(requestFields.get("Year"));
         book.setAvailable(Integer.parseInt(requestFields.get("Available")));
         Response response = RestAssured
                 .given()
                 .when()
                 .get("/books/" + bookId);
 
-        assertEquals(response.then().extract().path("name"), book.getTitle());
+        assertEquals(response.then().extract().path("title"), book.getTitle());
         assertEquals(response.then().extract().path("author"), book.getAuthor());
-        assertEquals(response.then().extract().path("year"), book.getBookYear());
+        assertEquals(response.then().extract().path("bookYear"), book.getBookYear());
         assertEquals(response.then().extract().path("available").toString(), requestFields.get("Available"));
-
     }
 }
+

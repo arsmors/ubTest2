@@ -54,5 +54,10 @@ public class BookController {
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/deleteAll")
+    public void deleteAllBooks() {
+        bookService.deleteAllBooks();
+    }
 }
 

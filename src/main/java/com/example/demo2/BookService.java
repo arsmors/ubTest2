@@ -3,16 +3,21 @@ package com.example.demo2;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BookService {
     @Autowired
-    private BookRepository bookRepository;
+    private final BookRepository bookRepository;
+    private final JdbcTemplate jdbcTemplate;
+
 
     @Autowired
-    public BookService(BookRepository bookRepository) {
+    public BookService(BookRepository bookRepository, JdbcTemplate jdbcTemplate) {
         this.bookRepository = bookRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public Book addBook(Book book) {
@@ -48,6 +53,14 @@ public class BookService {
             throw new BookNotFoundException("Book not found with ID: " + id);
         }
         bookRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteAllBooks() {
+        bookRepository.deleteAll();
+
+        String resetScript = "reset.sql";
+        jdbcTemplate.execute("RUNSCRIPT FROM 'classpath:" + resetScript + "'");
     }
 }
 
