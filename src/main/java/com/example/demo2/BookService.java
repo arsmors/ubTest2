@@ -27,12 +27,10 @@ public class BookService {
     }
 
     public List<Book> getAllBooks() {
-        // Implement logic to retrieve a list of all books in the library
         return bookRepository.findAll();
     }
 
     public Book getBookById(int id) {
-        // Implement logic to retrieve a book by its ID
         return bookRepository.findById(id)
                 .orElseThrow(() -> new BookNotFoundException("Book not found with ID: " + id));
     }
@@ -41,7 +39,7 @@ public class BookService {
         if (!bookRepository.existsById(id)) {
             throw new BookNotFoundException("Book not found with ID: " + id);
         }
-        book.setId(id); // Set the ID of the book to the provided ID
+        book.setId(id);
         return bookRepository.save(book);
     }
 
@@ -51,8 +49,5 @@ public class BookService {
         }
         bookRepository.deleteById(id);
     }
-
-
-
 }
 

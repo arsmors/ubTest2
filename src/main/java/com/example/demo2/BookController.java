@@ -25,13 +25,13 @@ public class BookController {
         this.bookService = bookService;
     }
 
-    @PostMapping("/add") // Map this method to handle POST requests at /api/books/add
+    @PostMapping("/add")
     public ResponseEntity<Book> addBook(@RequestBody Book book) {
         Book addedBook = bookService.addBook(book);
         return new ResponseEntity<>(addedBook, HttpStatus.CREATED);
     }
 
-    @GetMapping("/list") // Map this method to handle GET requests at /api/books/list
+    @GetMapping("/list")
     public ResponseEntity<List<Book>> getAllBooks() {
         List<Book> books = bookService.getAllBooks();
         return new ResponseEntity<>(books, HttpStatus.OK);

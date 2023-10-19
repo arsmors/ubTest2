@@ -23,10 +23,7 @@ public class Book {
 
     private String bookYear;
 
-    // Constructors, getters, and setters
-
     public Book() {
-        // Default constructor
     }
 
     public Book(String title, String author, int available, String bookYear) {
@@ -35,8 +32,6 @@ public class Book {
         this.available = available;
         this.bookYear = bookYear;
     }
-
-    // Getters and setters for all attributes
 
     public int getId() {
         return id;
