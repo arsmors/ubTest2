@@ -1,12 +1,11 @@
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import com.example.demo2.Book;
-import com.example.demo2.BookController;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -20,9 +19,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 
 public class MyStepdefs {
-    BookController bookController;
     Response response;
-    Response responsePut;
 
     @Before
     public void setup() {
@@ -41,7 +38,7 @@ public class MyStepdefs {
                 .then().body("size()", is(0));
     }
 
-    @Then("the library should have total {int} books")
+    @Then("The library should have total {int} books")
     public void theLibraryShouldHaveTotalBooks(int qty) {
         RestAssured
                 .given()
@@ -65,27 +62,32 @@ public class MyStepdefs {
         String responseBodyGatsby = response.getBody().asString();
         JsonPath jsonPathGatsby = new JsonPath(responseBodyGatsby);
 
-        responsePut = given()
+        given()
                 .contentType(ContentType.JSON)
                 .body(book)
                 .when()
                 .put("/books/" + jsonPathGatsby.get("id"));
     }
 
-    @Then("I get the book with following info")
+    @Then("I get the books with following info")
     public void theBookIsUpdatedWithFollowingInfo(DataTable dataTable) {
         List<Map<String, String>> books = dataTable.asMaps();
-        JsonPath jsonPath;
-        if (responsePut ==null) {
-            jsonPath = new JsonPath(response.body().asString());
+        JsonPath jsonPath = new JsonPath(response.body().asString());
+        if (books.size() == 1) {
+            assertEquals(jsonPath.get("title"), books.get(0).get("Name"));
+            assertEquals(jsonPath.get("author"), books.get(0).get("Author"));
+            assertEquals(jsonPath.get("bookYear"), books.get(0).get("Year"));
+            assertEquals(jsonPath.get("available").toString(), books.get(0).get("Available"));
+            assertEquals(jsonPath.get("id").toString(), books.get(0).get("ID"));
         } else {
-            jsonPath = new JsonPath(responsePut.body().asString());
+            for (int i = 0; i < books.size(); i++) {
+                assertEquals(jsonPath.getList("title").get(i), books.get(i).get("Name"));
+                assertEquals(jsonPath.getList("author").get(i), books.get(i).get("Author"));
+                assertEquals(jsonPath.getList("bookYear").get(i), books.get(i).get("Year"));
+                assertEquals(jsonPath.getList("available").get(i).toString(), books.get(i).get("Available"));
+                assertEquals(jsonPath.getList("id").get(i).toString(), books.get(i).get("ID"));
+            }
         }
-        assertEquals(jsonPath.get("title"), books.get(0).get("Name"));
-        assertEquals(jsonPath.get("author"), books.get(0).get("Author"));
-        assertEquals(jsonPath.get("bookYear"), books.get(0).get("Year"));
-        assertEquals(jsonPath.get("available").toString(), books.get(0).get("Available"));
-        assertEquals(jsonPath.get("id").toString(), books.get(0).get("ID"));
     }
 
     @Given("the library is empty")
@@ -99,7 +101,7 @@ public class MyStepdefs {
                 .body("size()", is(0));
     }
 
-    @Given("books are added to the library with following data")
+    @Given("Books are added to the library with following data")
     public void booksAreAddedToTheLibraryWithFollowingData(DataTable dataTable) {
         List<Map<String, String>> books = dataTable.asMaps();
 
@@ -124,10 +126,36 @@ public class MyStepdefs {
 
     @When("I request the book with id {int}")
     public void iRequestTheBookWithId(int id) {
-        response =  RestAssured
+        response = RestAssured
                 .given()
                 .when()
                 .get("/books/" + id);
+
+        response
+                .then()
+                .statusCode(200);
+    }
+
+    @When("I delete all books in the library")
+    public void iDeleteAllBooksInTheLibrary() {
+        response = given()
+                .when()
+                .delete("/books/deleteAll");
+    }
+
+    @When("I delete book with id {int}")
+    public void iDeleteBookWithId(int id) {
+        response = given()
+                .when()
+                .delete("/books/" + id);
+
+    }
+
+    @And("I get the list of all available books in the library")
+    public void listAllAvailableBooks() {
+        response = given()
+                .when()
+                .get("/books/list");
 
         response
                 .then()
