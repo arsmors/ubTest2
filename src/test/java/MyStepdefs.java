@@ -1,8 +1,10 @@
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import com.example.demo2.Book;
 import com.example.demo2.BookController;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -119,6 +121,50 @@ public class MyStepdefs {
         assertEquals(response.then().extract().path("author"), book.getAuthor());
         assertEquals(response.then().extract().path("bookYear"), book.getBookYear());
         assertEquals(response.then().extract().path("available").toString(), requestFields.get("Available"));
+    }
+
+    @Given("the library is empty")
+    public void theLibraryIsEmpty() {
+        RestAssured
+                .given()
+                .when()
+                .get("/books/list")
+                .then()
+                .statusCode(200)
+                .body("size()", is(0));
+    }
+
+    @Given("books are added to the library with following data")
+    public void booksAreAddedToTheLibraryWithFollowingData(DataTable dataTable) {
+        List<Map<String, String>> books = dataTable.asMaps();
+
+        for (Map<String, String> bookData : books) {
+            Book book = new Book();
+            book.setTitle(bookData.get("Name"));
+            book.setAuthor(bookData.get("Author"));
+            book.setBookYear(bookData.get("Year"));
+            book.setAvailable(Integer.parseInt(bookData.get("Available")));
+
+            Response response = given()
+                    .contentType(ContentType.JSON)
+                    .body(book)
+                    .when()
+                    .post("/books/add");
+
+            response
+                    .then()
+                    .statusCode(201);
+        }
+    }
+
+    @When("I request the book with id {int}")
+    public void iRequestTheBookWithId(int id) {
+        RestAssured
+                .given()
+                .when()
+                .get("/books/" + id)
+                .then()
+                .statusCode(200);
     }
 }
 
