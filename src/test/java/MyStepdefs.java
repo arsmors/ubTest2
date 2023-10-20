@@ -14,7 +14,6 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import org.apache.commons.lang3.RandomStringUtils;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.core.Is.is;
@@ -24,7 +23,6 @@ public class MyStepdefs {
     BookController bookController;
     Response responsePost;
     Response responsePut;
-    private int bookId = 0;
 
     @Before
     public void setup() {
@@ -43,30 +41,6 @@ public class MyStepdefs {
                 .then().body("size()", is(0));
     }
 
-    @When("{int} books are added to the library")
-    public void booksAreAddedToTheLibrary(int qty) {
-        Book book = new Book();
-        Random random = new Random();
-        for (int i = 0; i < qty; i++) {
-            book.setTitle("Name" + RandomStringUtils.randomNumeric(10));
-            book.setAuthor("Author" + RandomStringUtils.randomNumeric(10));
-            book.setBookYear("19" + RandomStringUtils.randomNumeric(2));
-            book.setAvailable(random.nextInt(99));
-            Response response = given()
-                    .contentType(ContentType.JSON)
-                    .body(book)
-                    .when()
-                    .post("/books/add");
-
-            response
-                    .then()
-                    .statusCode(201);
-
-            bookId = response.then().extract().path("id");
-        }
-    }
-
-
     @Then("the library should have total {int} books")
     public void theLibraryShouldHaveTotalBooks(int qty) {
         RestAssured
@@ -76,21 +50,6 @@ public class MyStepdefs {
                 .then()
                 .statusCode(200)
                 .body("size()", is(qty));
-    }
-
-    @Given("the library has the following books")
-    public void theLibraryHasTheFollowingBooks(Map<String, String> requestFields) {
-        Book book = new Book();
-        book.setTitle(requestFields.get("Title"));
-        book.setAuthor(requestFields.get("Author"));
-        book.setBookYear(requestFields.get("bookYear"));
-        book.setAvailable(Integer.parseInt(requestFields.get("Available")));
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(book)
-                .when()
-                .put("/books/" + bookId);
     }
 
     @When("I update book with following info")

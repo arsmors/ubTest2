@@ -9,10 +9,6 @@ Feature: Library with books
       | Dracula          | Bram Stoker         | 1897 | 1         |
     Then the library should have total 3 books
 
-#    Examples:
-#      | name1         | author1     | year1 | available1 | name2            | author2             | year2 | available2 |
-#      | War and Peace | Lev Tolstoy | 1901  | 2          | The Great Gatsby | F. Scott Fitzgerald | 1912  | 5          |
-
   Scenario: Get a book by ID
     Given books are added to the library with following data
       | Name             | Author              | Year | Available |
@@ -34,7 +30,6 @@ Feature: Library with books
     And I update book with following info
       | Name                   | Author         | Year | Available |
       | The Catcher in the Rye | J. D. Salinger | 1951 | 100       |
-
     Then I get the book with following info
       | Name                   | Author         | Year | Available | ID |
       | The Catcher in the Rye | J. D. Salinger | 1951 | 100       | 2  |
