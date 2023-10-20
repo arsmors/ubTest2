@@ -12,6 +12,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -21,6 +22,8 @@ import static org.junit.Assert.assertEquals;
 
 public class MyStepdefs {
     BookController bookController;
+    Response responsePost;
+    Response responsePut;
     private int bookId = 0;
 
     @Before
@@ -91,36 +94,39 @@ public class MyStepdefs {
     }
 
     @When("I update book with following info")
-    public void iUpdateBookWithFollowingInfo(Map<String, String> requestFields) {
-        Book book = new Book();
-        book.setTitle(requestFields.get("Name"));
-        book.setAuthor(requestFields.get("Author"));
-        book.setBookYear(requestFields.get("Year"));
-        book.setAvailable(Integer.parseInt(requestFields.get("Available")));
+    public void iUpdateBookWithFollowingInfo(DataTable dataTable) {
+        List<Map<String, String>> books = dataTable.asMaps();
 
-        given()
+        Book book = new Book();
+        book.setTitle(books.get(0).get("Name"));
+        book.setAuthor(books.get(0).get("Author"));
+        book.setBookYear(books.get(0).get("Year"));
+        book.setAvailable(Integer.parseInt(books.get(0).get("Available")));
+
+        String responseBodyGatsby = responsePost.getBody().asString();
+        JsonPath jsonPathGatsby = new JsonPath(responseBodyGatsby);
+
+        responsePut = given()
                 .contentType(ContentType.JSON)
                 .body(book)
                 .when()
-                .put("/books/" + bookId);
+                .put("/books/" + jsonPathGatsby.get("id"));
     }
 
-    @Then("the book is updated with following info")
-    public void theBookIsUpdatedWithFollowingInfo(Map<String, String> requestFields) {
-        Book book = new Book();
-        book.setTitle(requestFields.get("Name"));
-        book.setAuthor(requestFields.get("Author"));
-        book.setBookYear(requestFields.get("Year"));
-        book.setAvailable(Integer.parseInt(requestFields.get("Available")));
-        Response response = RestAssured
-                .given()
-                .when()
-                .get("/books/" + bookId);
-
-        assertEquals(response.then().extract().path("title"), book.getTitle());
-        assertEquals(response.then().extract().path("author"), book.getAuthor());
-        assertEquals(response.then().extract().path("bookYear"), book.getBookYear());
-        assertEquals(response.then().extract().path("available").toString(), requestFields.get("Available"));
+    @Then("I get the book with following info")
+    public void theBookIsUpdatedWithFollowingInfo(DataTable dataTable) {
+        List<Map<String, String>> books = dataTable.asMaps();
+        JsonPath jsonPath;
+        if (responsePut ==null) {
+            jsonPath = new JsonPath(responsePost.body().asString());
+        } else {
+            jsonPath = new JsonPath(responsePut.body().asString());
+        }
+        assertEquals(jsonPath.get("title"), books.get(0).get("Name"));
+        assertEquals(jsonPath.get("author"), books.get(0).get("Author"));
+        assertEquals(jsonPath.get("bookYear"), books.get(0).get("Year"));
+        assertEquals(jsonPath.get("available").toString(), books.get(0).get("Available"));
+        assertEquals(jsonPath.get("id").toString(), books.get(0).get("ID"));
     }
 
     @Given("the library is empty")
@@ -159,10 +165,12 @@ public class MyStepdefs {
 
     @When("I request the book with id {int}")
     public void iRequestTheBookWithId(int id) {
-        RestAssured
+        responsePost =  RestAssured
                 .given()
                 .when()
-                .get("/books/" + id)
+                .get("/books/" + id);
+
+        responsePost
                 .then()
                 .statusCode(200);
     }
