@@ -35,6 +35,3 @@ Feature: Library with books
       | The Catcher in the Rye | J. D. Salinger | 1951 | 100       | 2  |
 
 
-#    When I request the book with id 1
-#    Then I should see the book with id 1 and name War and Peace and Author "Lev Tolstoy"
-

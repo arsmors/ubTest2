@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 public class MyStepdefs {
     BookController bookController;
-    Response responsePost;
+    Response response;
     Response responsePut;
 
     @Before
@@ -62,7 +62,7 @@ public class MyStepdefs {
         book.setBookYear(books.get(0).get("Year"));
         book.setAvailable(Integer.parseInt(books.get(0).get("Available")));
 
-        String responseBodyGatsby = responsePost.getBody().asString();
+        String responseBodyGatsby = response.getBody().asString();
         JsonPath jsonPathGatsby = new JsonPath(responseBodyGatsby);
 
         responsePut = given()
@@ -77,7 +77,7 @@ public class MyStepdefs {
         List<Map<String, String>> books = dataTable.asMaps();
         JsonPath jsonPath;
         if (responsePut ==null) {
-            jsonPath = new JsonPath(responsePost.body().asString());
+            jsonPath = new JsonPath(response.body().asString());
         } else {
             jsonPath = new JsonPath(responsePut.body().asString());
         }
@@ -110,7 +110,7 @@ public class MyStepdefs {
             book.setBookYear(bookData.get("Year"));
             book.setAvailable(Integer.parseInt(bookData.get("Available")));
 
-            Response response = given()
+            response = given()
                     .contentType(ContentType.JSON)
                     .body(book)
                     .when()
@@ -124,12 +124,12 @@ public class MyStepdefs {
 
     @When("I request the book with id {int}")
     public void iRequestTheBookWithId(int id) {
-        responsePost =  RestAssured
+        response =  RestAssured
                 .given()
                 .when()
                 .get("/books/" + id);
 
-        responsePost
+        response
                 .then()
                 .statusCode(200);
     }
