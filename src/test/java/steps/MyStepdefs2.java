@@ -93,17 +93,6 @@ public class MyStepdefs2 {
         }
     }
 
-    @Given("the library is empty")
-    public void theLibraryIsEmpty() {
-        RestAssured
-                .given()
-                .when()
-                .get("/books/list")
-                .then()
-                .statusCode(200)
-                .body("size()", is(0));
-    }
-
     @Test
     @Given("Books are added to the library with following data")
     public void booksAreAddedToTheLibraryWithFollowingData(DataTable dataTable) {
