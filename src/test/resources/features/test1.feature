@@ -1,7 +1,7 @@
 Feature: Library with books
 
   Scenario: Add books to library
-    Given Books are added to the library with following data
+    When Books are added to the library with following data
       | Name             | Author              | Year | Available |
       | War and Peace    | Lev Tolstoy         | 1901 | 2         |
       | The Great Gatsby | F. Scott Fitzgerald | 1912 | 5         |

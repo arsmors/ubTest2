@@ -1,3 +1,5 @@
+package steps;
+
 import java.util.List;
 import java.util.Map;
 
@@ -13,12 +15,13 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import org.junit.Test;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 
-public class MyStepdefs {
+public class MyStepdefs2 {
     Response response;
 
     @Before
@@ -101,6 +104,7 @@ public class MyStepdefs {
                 .body("size()", is(0));
     }
 
+    @Test
     @Given("Books are added to the library with following data")
     public void booksAreAddedToTheLibraryWithFollowingData(DataTable dataTable) {
         List<Map<String, String>> books = dataTable.asMaps();
