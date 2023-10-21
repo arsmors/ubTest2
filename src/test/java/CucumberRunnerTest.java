@@ -7,10 +7,7 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
         features = "src/test/resources/features",
         glue = "steps",
-        plugin = {
-                "json:target/cucumber-report.json",
-                "html:target/cucumber-report.html"
-        })
+        plugin = {"json:target/cucumber.json"})
 
 public class CucumberRunnerTest extends AbstractTestNGCucumberTests {
 
